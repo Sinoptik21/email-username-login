@@ -1,2 +1,2 @@
 # email-username-login
-Вход по email или лоину
+Модуль для Drupal 7 для входа по email или логину.

@@ -1,0 +1,49 @@
+<?php
+/**
+ * Implements hook_form_alter().
+ */
+function email_username_login_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    case 'user_login':
+    case 'user_login_block':
+      $form['name']['#element_validate'][] = '_email_username_login_user_login_validate';
+  }
+}
+
+/**
+ * Form element validation handler for the user login form.
+ * Allows users to authenticate by email.
+ */
+function _email_username_login_user_login_validate($form, &$form_state) {
+  $name = NULL;
+  if (isset($form_state['values']['name']) && valid_email_address($form_state['values']['name'])) {
+    $name = db_select('users')
+      ->fields('users', array('name'))
+      ->condition('mail', db_like($form_state['values']['name']), 'LIKE')
+      ->execute()
+      ->fetchField();
+  }
+  if (!empty($name)) {
+    $form_state['values']['email'] = $form_state['values']['name'];
+    $form_state['values']['name'] = $name;
+  }
+  elseif (!variable_get('email_registration_login_with_username', TRUE)) {
+    $form_state['values']['name'] = NULL;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function email_username_login_form_user_login_alter(&$form, &$form_state) {
+  $form['name']['#title'] = t('E-mail or username');
+  $form['name']['#description'] = t('Enter your e-mail address or username.');
+  $form['pass']['#description'] = t('Enter the password that accompanies your e-mail or username.');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function email_username_login_form_user_login_block_alter(&$form, &$form_state) {
+  $form['name']['#title'] = t('E-mail or username');
+}

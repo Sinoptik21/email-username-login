@@ -1,0 +1,5 @@
+name = Email or Username Login
+description = Module allows to login via email or username.
+package = Bokus
+core = 7.x
+version = 7.x-0.1
